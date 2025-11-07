@@ -1,115 +1,365 @@
 <!doctype html>
 <html lang="en">
   <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Landmarks Test</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Landmarks Test — Multiple Choice</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" />
     <style>
       body {
         background-color: #f8f9fa;
       }
       .test-container {
-        max-width: 600px;
-        margin: 100px auto;
+        max-width: 700px;
+        margin: 40px auto;
       }
       img {
         width: 100%;
-        height: 300px;
+        height: 350px;
         object-fit: cover;
-        border-radius: 10px;
+        border-radius: 12px;
+        margin-bottom: 16px;
+      }
+      .btn-option {
+        width: 100%;
+        text-align: left;
+        margin: 6px 0;
       }
       .feedback {
-        font-weight: bold;
+        font-weight: 600;
         min-height: 2rem;
       }
     </style>
   </head>
   <body>
     <div class="container text-center test-container">
-      <h1 class="mb-4">Landmarks Test</h1>
-      <div id="image-container">
-        <img id="landmark-image" src="" alt="Landmark">
+      <h1 class="mb-4">Landmarks Multiple Choice Test</h1>
+
+      <div id="question-container" class="card p-3 shadow-sm">
+        <h5 id="question-number" class="mb-3"></h5>
+        <img id="landmark-image" src="" alt="Landmark" />
+        <div id="options-container" class="mb-2"></div>
       </div>
-      <div class="mt-3">
-        <input type="text" id="answer" class="form-control text-center" placeholder="Type your answer here">
-      </div>
-      <div class="mt-3">
-        <button id="check-btn" class="btn btn-success me-2">Check Answer</button>
+
+      <div class="mt-3 feedback" id="feedback"></div>
+
+      <div class="mt-4">
         <button id="reveal-btn" class="btn btn-warning me-2">Reveal Answer</button>
+        <button id="prev-btn" class="btn btn-secondary me-2">Previous</button>
         <button id="next-btn" class="btn btn-primary">Next</button>
       </div>
-      <div class="mt-3 feedback" id="feedback"></div>
-      <div class="mt-5">
-        <a href="index.html" class="btn btn-secondary">← Back to Study Hall</a>
+
+      <div class="mt-4">
+        <a href="index.html" class="btn btn-outline-dark">← Back to Study Hall</a>
       </div>
     </div>
 
     <script>
-      const landmarks = [
-        { name: "Eiffel Tower – Paris", img: "eiffel_tower.jpg" },
-        { name: "Taj Mahal – India", img: "taj_mahal.jpg" },
-        { name: "Sydney Opera House – Australia", img: "sydney_opera_house.jpg" },
-        { name: "Burj Khalifa – UAE", img: "burj_khalifa.png" },
-        { name: "Sagrada Família – Spain", img: "sagrada_familia.jpg" },
-        { name: "Pantheon – Rome", img: "pantheon.jpg" },
-        { name: "Colosseum – Rome", img: "colosseum.jpg" },
-        { name: "Hagia Sophia – Istanbul", img: "hagia_sophia.jpg" },
-        { name: "Fallingwater – USA", img: "falling_water.jpg" },
-        { name: "Villa Savoye – France", img: "villa_savoye.jpg" },
-        { name: "Brasília Cathedral – Brazil", img: "brasilia_cathedral.jpg" },
-        { name: "Walt Disney Concert Hall – USA", img: "walt_disney_concert_hall.jpg" },
-        { name: "Heydar Aliyev Center – Azerbaijan", img: "heydar_aliyev_center.jpg" },
-        { name: "Millau Viaduct – France", img: "millau_viaduct.jpg" },
-        { name: "Angel of the North – UK", img: "angel_of_the_north.jpg" },
-        { name: "The Kelpies – Scotland", img: "the_kelpies.jpg" },
-        { name: "Michelangelo’s David – Italy", img: "david.jpg" },
-        { name: "Bernini’s Ecstasy of St. Teresa – Italy", img: "bernini's_ecstacy_of_st_Teresa.jpg" },
-        { name: "Rodin’s Thinker – France", img: "thinker.jpg" },
-        { name: "Trevi Fountain – Rome", img: "trevi_fountain.jpg" }
-      ];
-
-      let currentLandmark;
-
-      function getRandomLandmark() {
-        const randomIndex = Math.floor(Math.random() * landmarks.length);
-        currentLandmark = landmarks[randomIndex];
-        document.getElementById('landmark-image').src = currentLandmark.img;
-        document.getElementById('answer').value = "";
-        document.getElementById('feedback').textContent = "";
+      // Fisher-Yates shuffle
+      function shuffleArray(array) {
+        const arr = array.slice();
+        for (let i = arr.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+        return arr;
       }
 
-      document.getElementById('check-btn').addEventListener('click', () => {
-        const userAnswer = document.getElementById('answer').value.trim().toLowerCase();
-        const correctAnswer = currentLandmark.name.toLowerCase();
-        const feedback = document.getElementById('feedback');
-
-        if (userAnswer === "") {
-          feedback.textContent = "Please type an answer.";
-          feedback.style.color = "gray";
-          return;
+      const questions = [
+        {
+          name: "Eiffel Tower – Paris",
+          img: "eiffel_tower.jpg",
+          options: [
+            "Eiffel Tower – Paris",
+            "Leaning Tower of Pisa – Italy",
+            "Big Ben – London",
+            "Statue of Liberty – USA"
+          ]
+        },
+        {
+          name: "Taj Mahal – India",
+          img: "taj_mahal.jpg",
+          options: [
+            "Taj Mahal – India",
+            "Lotus Temple – India",
+            "Angkor Wat – Cambodia",
+            "Borobudur – Indonesia"
+          ]
+        },
+        {
+          name: "Sydney Opera House – Australia",
+          img: "sydney_opera_house.jpg",
+          options: [
+            "Sydney Opera House – Australia",
+            "Burj Khalifa – UAE",
+            "Petronas Towers – Malaysia",
+            "CN Tower – Canada"
+          ]
+        },
+        {
+          name: "Burj Khalifa – UAE",
+          img: "burj_khalifa.png",
+          options: [
+            "Burj Khalifa – UAE",
+            "Taipei 101 – Taiwan",
+            "Shanghai Tower – China",
+            "One World Trade Center – USA"
+          ]
+        },
+        {
+          name: "Sagrada Família – Spain",
+          img: "sagrada_familia.jpg",
+          options: [
+            "Sagrada Família – Spain",
+            "Notre-Dame – France",
+            "St. Peter’s Basilica – Vatican",
+            "Milan Cathedral – Italy"
+          ]
+        },
+        {
+          name: "Pantheon – Rome",
+          img: "pantheon.jpg",
+          options: [
+            "Pantheon – Rome",
+            "Parthenon – Greece",
+            "Colosseum – Rome",
+            "Hagia Sophia – Istanbul"
+          ]
+        },
+        {
+          name: "Colosseum – Rome",
+          img: "colosseum.jpg",
+          options: [
+            "Colosseum – Rome",
+            "Pantheon – Rome",
+            "Roman Forum – Rome",
+            "Trevi Fountain – Rome"
+          ]
+        },
+        {
+          name: "Hagia Sophia – Istanbul",
+          img: "hagia_sophia.jpg",
+          options: [
+            "Hagia Sophia – Istanbul",
+            "Blue Mosque – Istanbul",
+            "Topkapi Palace – Istanbul",
+            "Sultan Mosque – Singapore"
+          ]
+        },
+        {
+          name: "Fallingwater – USA",
+          img: "falling_water.jpg",
+          options: [
+            "Fallingwater – USA",
+            "Villa Savoye – France",
+            "Glass House – USA",
+            "Guggenheim Museum – USA"
+          ]
+        },
+        {
+          name: "Villa Savoye – France",
+          img: "villa_savoye.jpg",
+          options: [
+            "Villa Savoye – France",
+            "Fallingwater – USA",
+            "Maison La Roche – France",
+            "Ronchamp Chapel – France"
+          ]
+        },
+        {
+          name: "Brasília Cathedral – Brazil",
+          img: "brasilia_cathedral.jpg",
+          options: [
+            "Brasília Cathedral – Brazil",
+            "Sagrada Família – Spain",
+            "St. Basil’s Cathedral – Russia",
+            "Notre-Dame – France"
+          ]
+        },
+        {
+          name: "Walt Disney Concert Hall – USA",
+          img: "walt_disney_concert_hall.jpg",
+          options: [
+            "Walt Disney Concert Hall – USA",
+            "Sydney Opera House – Australia",
+            "Lincoln Center – USA",
+            "Elbphilharmonie – Germany"
+          ]
+        },
+        {
+          name: "Heydar Aliyev Center – Azerbaijan",
+          img: "heydar_aliyev_center.jpg",
+          options: [
+            "Heydar Aliyev Center – Azerbaijan",
+            "Guggenheim Bilbao – Spain",
+            "Opera House – Oslo",
+            "Burj Al Arab – UAE"
+          ]
+        },
+        {
+          name: "Millau Viaduct – France",
+          img: "millau_viaduct.jpg",
+          options: [
+            "Millau Viaduct – France",
+            "Golden Gate Bridge – USA",
+            "Tower Bridge – UK",
+            "Brooklyn Bridge – USA"
+          ]
+        },
+        {
+          name: "Angel of the North – UK",
+          img: "angel_of_the_north.jpg",
+          options: [
+            "Angel of the North – UK",
+            "Christ the Redeemer – Brazil",
+            "Statue of Liberty – USA",
+            "The Kelpies – Scotland"
+          ]
+        },
+        {
+          name: "The Kelpies – Scotland",
+          img: "the_kelpies.jpg",
+          options: [
+            "The Kelpies – Scotland",
+            "Angel of the North – UK",
+            "Christ the Redeemer – Brazil",
+            "Moai Statues – Easter Island"
+          ]
+        },
+        {
+          name: "Michelangelo’s David – Italy",
+          img: "david.jpg",
+          options: [
+            "Michelangelo’s David – Italy",
+            "Venus de Milo – Greece",
+            "The Thinker – France",
+            "Ecstasy of St. Teresa – Italy"
+          ]
+        },
+        {
+          name: "Bernini’s Ecstasy of St. Teresa – Italy",
+          img: "bernini's_ecstacy_of_st_Teresa.jpg",
+          options: [
+            "Bernini’s Ecstasy of St. Teresa – Italy",
+            "Michelangelo’s David – Italy",
+            "The Pietà – Italy",
+            "The Thinker – France"
+          ]
+        },
+        {
+          name: "Rodin’s Thinker – France",
+          img: "thinker.jpg",
+          options: [
+            "Rodin’s Thinker – France",
+            "Michelangelo’s David – Italy",
+            "Venus de Milo – Greece",
+            "Ecstasy of St. Teresa – Italy"
+          ]
+        },
+        {
+          name: "Trevi Fountain – Rome",
+          img: "trevi_fountain.jpg",
+          options: [
+            "Trevi Fountain – Rome",
+            "Fountain of Wealth – Singapore",
+            "Magic Fountain – Spain",
+            "Fountain of Neptune – Italy"
+          ]
         }
+      ];
 
-        if (correctAnswer.includes(userAnswer) || userAnswer.includes(correctAnswer.split("–")[0].trim())) {
-          feedback.textContent = "✅ Correct! It's " + currentLandmark.name;
-          feedback.style.color = "green";
+      let currentIndex = 0;
+      const imageEl = document.getElementById("landmark-image");
+      const qNumEl = document.getElementById("question-number");
+      const optionsContainer = document.getElementById("options-container");
+      const feedbackEl = document.getElementById("feedback");
+
+      function loadQuestion() {
+        const q = questions[currentIndex];
+        imageEl.src = q.img;
+        qNumEl.textContent = `Question ${currentIndex + 1} of ${questions.length}`;
+        feedbackEl.textContent = "";
+        // create a shuffled copy of options so correct answer is mixed
+        const shuffledOptions = shuffleArray(q.options);
+        optionsContainer.innerHTML = "";
+        shuffledOptions.forEach(opt => {
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "btn btn-outline-dark btn-option";
+          btn.textContent = opt;
+          btn.dataset.option = opt;
+          btn.addEventListener("click", () => {
+            checkAnswer(opt);
+          });
+          optionsContainer.appendChild(btn);
+        });
+      }
+
+      function checkAnswer(selected) {
+        const q = questions[currentIndex];
+        const correct = q.name;
+        // disable all option buttons after one selection
+        const buttons = optionsContainer.querySelectorAll("button");
+        buttons.forEach(b => (b.disabled = true));
+
+        if (selected === correct) {
+          feedbackEl.textContent = `✅ Correct! It's ${correct}`;
+          feedbackEl.style.color = "green";
+          // highlight the selected button green
+          buttons.forEach(b => {
+            if (b.dataset.option === selected) {
+              b.className = "btn btn-success btn-option";
+            }
+          });
         } else {
-          feedback.textContent = "❌ Wrong! The correct answer is " + currentLandmark.name;
-          feedback.style.color = "red";
+          feedbackEl.textContent = `❌ Wrong! The correct answer is ${correct}`;
+          feedbackEl.style.color = "red";
+          // highlight correct and selected choices
+          buttons.forEach(b => {
+            if (b.dataset.option === correct) {
+              b.className = "btn btn-success btn-option";
+            } else if (b.dataset.option === selected) {
+              b.className = "btn btn-danger btn-option";
+            } else {
+              b.className = "btn btn-outline-dark btn-option";
+            }
+          });
+        }
+      }
+
+      // Reveal answer without marking wrong
+      document.getElementById("reveal-btn").addEventListener("click", () => {
+        const q = questions[currentIndex];
+        feedbackEl.textContent = `💡 The correct answer is: ${q.name}`;
+        feedbackEl.style.color = "blue";
+        // visually highlight correct button and disable options
+        const buttons = optionsContainer.querySelectorAll("button");
+        buttons.forEach(b => {
+          b.disabled = true;
+          if (b.dataset.option === q.name) b.className = "btn btn-success btn-option";
+          else b.className = "btn btn-outline-dark btn-option";
+        });
+      });
+
+      document.getElementById("next-btn").addEventListener("click", () => {
+        if (currentIndex < questions.length - 1) {
+          currentIndex++;
+          loadQuestion();
+        } else {
+          feedbackEl.textContent = "🎉 You've reached the end of the quiz!";
+          feedbackEl.style.color = "purple";
         }
       });
 
-      // Reveal Answer Button
-      document.getElementById('reveal-btn').addEventListener('click', () => {
-        const feedback = document.getElementById('feedback');
-        feedback.textContent = "💡 The correct answer is: " + currentLandmark.name;
-        feedback.style.color = "blue";
+      document.getElementById("prev-btn").addEventListener("click", () => {
+        if (currentIndex > 0) {
+          currentIndex--;
+          loadQuestion();
+        }
       });
 
-      document.getElementById('next-btn').addEventListener('click', getRandomLandmark);
-
-      // Load a random landmark when the page opens
-      window.onload = getRandomLandmark;
+      // initial load
+      window.onload = loadQuestion;
     </script>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
